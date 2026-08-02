@@ -14,7 +14,7 @@ st.set_page_config(layout="wide", page_title="De Film Fabriek")
 # NAVIGATIE MENU (SIDEBAR)
 # ==========================================
 st.sidebar.title("🛠️ The Film Creator")
-huidige_pagina = st.sidebar.radio("Kies je tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Fabriek", "📝 Beschrijving Generator"])
+huidige_pagina = st.sidebar.radio("Kies je tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Fabriek", "📝 Beschrijving Generator", "🖼️ Thumbnail Compositor"])
 st.sidebar.markdown("***")
 st.sidebar.info("Let the editor use their own OpenAI API key. Voice-overs are securely handled internally.")
 
@@ -407,3 +407,106 @@ elif huidige_pagina == "📝 Beschrijving Generator":
 
             except Exception as e:
                 st.error(f"Er ging iets mis met de API: {e}")
+
+# Bovenaan in je document moet je deze extra import toevoegen (onder import io):
+from PIL import Image, ImageDraw, ImageFont
+
+# ==========================================
+# TOOL 5: DE THUMBNAIL COMPOSITOR
+# ==========================================
+elif huidige_pagina == "🖼️ Thumbnail Compositor":
+    st.title("🖼️ Thumbnail Compositor")
+    st.write("Bouw in 2 seconden een 100% consistente thumbnail.")
+
+    # Maak automatisch de assets map aan als deze niet bestaat
+    if not os.path.exists("assets"):
+        os.makedirs("assets")
+
+    # 1. De lijst met 15 specifieke emoties / houdingen
+    emoties = [
+        "Blij", "Verward", "Geschrokken", "Boos", "Huilend",
+        "Rennend", "Wijzend", "Nadenkend", "Lachend", "Gefrustreerd",
+        "Slapend", "Verbaasd", "Trots", "Zwaaiend", "Schouderophalend"
+    ]
+    gekozen_emotie = st.selectbox("1. Kies de houding/emotie van je Stickman:", emoties)
+
+    st.markdown("---")
+    
+    # 2. Achtergrond instellingen
+    bg_keuze = st.radio("2. Kies je achtergrond:", ["Effen Kleur (Snel & Opvallend)", "Upload een achtergrondafbeelding"])
+    bg_color = "#FFCC00" # Standaard YouTube geel
+    bg_image = None
+    
+    if bg_keuze == "Effen Kleur (Snel & Opvallend)":
+        bg_color = st.color_picker("Kies de kleurcode:", "#FFD700")
+    else:
+        bg_image = st.file_uploader("Upload achtergrond (Ideaal 1280x720):", type=["jpg", "png", "jpeg"])
+
+    st.markdown("---")
+
+    # 3. Tekst Opties (Met mogelijkheid voor "Geen tekst")
+    voeg_tekst_toe = st.checkbox("3. Voeg grote tekst toe aan de thumbnail", value=False)
+    thumbnail_tekst = ""
+    if voeg_tekst_toe:
+        thumbnail_tekst = st.text_input("Typ je clickbait tekst hier:", "SHOCKING TRUTH")
+        st.info("Tip: Upload een lettertype bestand genaamd 'impact.ttf' in je map voor het beste, dikke YouTube-effect.")
+
+    if st.button("🖼️ Genereer Thumbnail"):
+        with st.spinner("Thumbnail aan het bouwen..."):
+            try:
+                # A. Maak de achtergrond (1280 x 720 is de YouTube standaard)
+                if bg_image:
+                    bg = Image.open(bg_image).convert("RGBA")
+                    bg = bg.resize((1280, 720))
+                else:
+                    bg = Image.new("RGBA", (1280, 720), bg_color)
+
+                # B. Laad en plak de stickman
+                stickman_pad = f"assets/{gekozen_emotie.lower()}.png"
+                if os.path.exists(stickman_pad):
+                    stickman = Image.open(stickman_pad).convert("RGBA")
+                    
+                    # Zorg dat de stickman mooi op maat is en zet hem rechts in beeld
+                    stickman.thumbnail((700, 700))
+                    
+                    # Bereken positie: Rechts in het midden
+                    y_pos = (720 - stickman.height) // 2
+                    x_pos = 1200 - stickman.width 
+                    
+                    # Plak de stickman met behoud van transparantie
+                    bg.paste(stickman, (x_pos, y_pos), stickman)
+                else:
+                    st.error(f"⚠️ Stickman niet gevonden! Upload eerst jouw bestand '{gekozen_emotie.lower()}.png' in de 'assets' map op je GitHub.")
+                    st.stop()
+
+                # C. Tekst toevoegen (Als de checkbox is aangevinkt)
+                if voeg_tekst_toe and thumbnail_tekst:
+                    draw = ImageDraw.Draw(bg)
+                    
+                    # Probeer Impact te laden, anders een standaard font
+                    try:
+                        font = ImageFont.truetype("impact.ttf", 90)
+                    except:
+                        font = ImageFont.load_default()
+                        st.warning("Standaard lettertype gebruikt. Zet 'impact.ttf' in GitHub voor een dikkere tekst.")
+
+                    # Voeg tekst toe met een strakke zwarte omlijning (stroke)
+                    draw.text((70, 300), thumbnail_tekst, fill="white", font=font, stroke_width=4, stroke_fill="black")
+
+                # D. Toon resultaat
+                st.success("Thumbnail is klaar!")
+                st.image(bg, caption=f"Thumbnail: {gekozen_emotie}")
+
+                # E. Maak downloadbaar
+                buf = io.BytesIO()
+                bg_rgb = bg.convert("RGB")
+                bg_rgb.save(buf, format="JPEG", quality=95)
+                st.download_button(
+                    label="📥 Download YouTube Thumbnail",
+                    data=buf.getvalue(),
+                    file_name=f"Thumbnail_{gekozen_emotie}.jpg",
+                    mime="image/jpeg"
+                )
+
+            except Exception as e:
+                st.error(f"Er ging iets mis tijdens het bouwen: {e}")
