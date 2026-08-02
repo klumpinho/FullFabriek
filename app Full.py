@@ -6,6 +6,8 @@ import base64
 from openai import OpenAI
 import zipfile
 import io
+# Hier staat de nieuwe import nu veilig bij de rest!
+from PIL import Image, ImageDraw, ImageFont
 
 # We stellen de pagina in op 'wide' zodat je lekker veel ruimte hebt
 st.set_page_config(layout="wide", page_title="De Film Fabriek")
@@ -407,9 +409,6 @@ elif huidige_pagina == "📝 Beschrijving Generator":
 
             except Exception as e:
                 st.error(f"Er ging iets mis met de API: {e}")
-
-# Bovenaan in je document moet je deze extra import toevoegen (onder import io):
-from PIL import Image, ImageDraw, ImageFont
 
 # ==========================================
 # TOOL 5: DE THUMBNAIL COMPOSITOR
