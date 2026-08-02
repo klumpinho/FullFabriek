@@ -415,88 +415,83 @@ elif huidige_pagina == "📝 Beschrijving Generator":
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.title("🖼️ Ultieme Gecontroleerde AI Thumbnail Generator")
-    st.write("Bouw killer-thumbnails met maximale stijl-consistentie of neem de volledige controle over via een vrije prompt.")
+    st.write("Bouw killer-thumbnails met maximale consistentie per bouwsteen, of laat de AI vrij.")
 
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_ultimate_thumbnail")
     
     st.markdown("---")
+    st.subheader("🛠️ Kanaal & Stijl Controle-panel")
+    st.write("Selecteer per categorie een specifieke stijl, of kies 'Geen voorkeur' voor creatieve vrijheid van de AI.")
+
+    # Kolommen voor de 5 stuurmenu's
+    col1, col2 = st.columns(2)
     
-    # Master switch om presets aan/uit te zetten voor een volledig vrije prompt
-    gebruik_presets = st.checkbox(
-        "🛠️ Activeer Kanaal-presets (Vink uit om volledig te vertrouwen op je eigen grote handmatige prompt)", 
-        value=True
-    )
+    geen_voorkeur = "— (Geen specifieke voorkeur)"
 
-    karakter_emotie, compositie, omgeving_sfeer, secundair_element, kleurvibe = "", "", "", "", ""
-
-    if gebruik_presets:
-        st.subheader("🛠️ Kanaal & Stijl Controle-panel")
-        col1, col2 = st.columns(2)
+    with col1:
+        emotie_input = st.selectbox(
+            "1. Hoofdkarakter & Emotie:", 
+            [geen_voorkeur,
+                "Geschrokken / Ogen groot (Shocked & wide-eyed)",
+                "Woedend / Gefrustreerd (Angry & yelling)",
+                "Paniekerig / Zweetdruppels (Panicked & sweating)",
+                "Geconcentreerd / Nerd (Focused & typing)",
+                "Nadenkend / Hand onder kin (Thinking)",
+                "Arrogant / Zelfverzekerd lachend (Arrogant smirking)",
+                "Doodsbang / Paranoïde (Terrified & paranoid)",
+                "Wijsneus / Uitleggend (Smartass pointing)"
+            ]
+        )
         
-        with col1:
-            karakter_emotie = st.selectbox(
-                "1. Hoofdkarakter & Emotie:", 
-                [
-                    "Geschrokken / Ogen groot (Shocked & wide-eyed)",
-                    "Woedend / Gefrustreerd (Angry & yelling)",
-                    "Paniekerig / Zweetdruppels (Panicked & sweating)",
-                    "Geconcentreerd / Nerd (Focused & typing)",
-                    "Nadenkend / Hand onder kin (Thinking)",
-                    "Arrogant / Zelfverzekerd lachend (Arrogant smirking)",
-                    "Doodsbang / Paranoïde (Terrified & paranoid)",
-                    "Wijsneus / Uitleggend (Smartass pointing)"
-                ]
-            )
-            
-            omgeving_sfeer = st.selectbox(
-                "3. Omgeving & Sfeer:", 
-                [
-                    "Donkere kamer / Schermlicht (Dark room lit only by monitor)",
-                    "Strakke kantoor / Studio (Clean minimal office)",
-                    "Felle neon / Cyberpunk vibe (Neon glowing background)",
-                    "Chaotische zolderkamer vol rommel (Messy attic room)",
-                    "Minimalistische witte studio (Clean white minimalist room)",
-                    "Donkere thriller / Criminologie setting (Dark gloomy basement)"
-                ]
-            )
-            
-            kleurvibe = st.selectbox(
-                "5. Kleurvibe (Color Palette):", 
-                [
-                    "Cinematic Dark Blue (Donkerblauw / Sfeervol)",
-                    "YouTube Pop (Geel & Zwart contrast)",
-                    "Tech Sleek (Grijs & Blauw)",
-                    "Alert Red (Rood & Donker)",
-                    "Matrix Green & Black (Hacker groen)",
-                    "Neon Cyberpunk (Paars & Roze neon)"
-                ]
-            )
+        omgeving_input = st.selectbox(
+            "3. Omgeving & Sfeer:", 
+            [geen_voorkeur,
+                "Donkere kamer / Schermlicht (Dark room lit only by monitor)",
+                "Strakke kantoor / Studio (Clean minimal office)",
+                "Felle neon / Cyberpunk vibe (Neon glowing background)",
+                "Chaotische zolderkamer vol rommel (Messy attic room)",
+                "Minimalistische witte studio (Clean white minimalist room)",
+                "Donkere thriller / Criminologie setting (Dark gloomy basement)"
+            ]
+        )
+        
+        kleurvibe_input = st.selectbox(
+            "5. Kleurvibe (Color Palette):", 
+            [geen_voorkeur,
+                "Cinematic Dark Blue (Donkerblauw / Sfeervol)",
+                "YouTube Pop (Geel & Zwart contrast)",
+                "Tech Sleek (Grijs & Blauw)",
+                "Alert Red (Rood & Donker)",
+                "Matrix Green & Black (Hacker groen)",
+                "Neon Cyberpunk (Paars & Roze neon)"
+            ]
+        )
 
-        with col2:
-            compositie = st.selectbox(
-                "2. Perspectief & Compositie:", 
-                [
-                    "Achter bureau / Computer (Desk setup with monitor)",
-                    "Close-up van het gezicht (Extreme close-up)",
-                    "Van boven / Vogelperspectief (Overhead view)",
-                    "Twee personen in gesprek (Side-by-side interaction)",
-                    "Groothoek over de hele kamer (Wide angle room overview)",
-                    "Van onderen opgekeken (Low angle dramatic shot)"
-                ]
-            )
-            
-            secundair_element = st.selectbox(
-                "4. Secundair Element (Focal Point):", 
-                [
-                    "Computer / App interface (Monitor showing a UI/post)",
-                    "Smartphone in de hand (Holding glowing phone)",
-                    "Groot object / Gevaar voor zich (Pointing at object)",
-                    "Grafieken en cijfers die exploderen (Exploding stock charts)",
-                    "Lege bureaustoel ernaast (Empty chair next to him)",
-                    "Gigantisch vraagteken in de kamer (Giant floating question mark)",
-                    "Geen secundair object (Focus purely on character)"
-                ]
-            )
+    with col2:
+        compositie_input = st.selectbox(
+            "2. Perspectief & Compositie:", 
+            [geen_voorkeur,
+                "Achter bureau / Computer (Desk setup with monitor)",
+                "Close-up van het gezicht (Extreme close-up)",
+                "Van boven / Vogelperspectief (Overhead view)",
+                "Twee personen in gesprek (Side-by-side interaction)",
+                "Groothoek over de hele kamer (Wide angle room overview)",
+                "Van onderen opgekeken (Low angle dramatic shot)"
+            ]
+        )
+        
+        element_input = st.selectbox(
+            "4. Secundair Element (Focal Point):", 
+            [geen_voorkeur,
+                "Computer / App interface (Monitor showing a UI/post)",
+                "Smartphone in de hand (Holding glowing phone)",
+                "Groot object / Gevaar voor zich (Pointing at object)",
+                "Grafieken en cijfers die exploderen (Exploding stock charts)",
+                "Lege bureaustoel ernaast (Empty chair next to him)",
+                "Gigantisch vraagteken in de kamer (Giant floating question mark)",
+                "Geen secundair object (Focus purely on character)"
+            ]
+        )
 
     st.markdown("---")
     
@@ -504,7 +499,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
         "Wat is de gedetailleerde scène-beschrijving?", 
         value="A post showing a funny transformation picture on screen, in the background at 50% visibility the word 'Loser'",
         height=120,
-        help="Typ hier je eigen scènes of extra instructies. Als de presets aan staan, vullen ze elkaar perfect aan. Staan ze uit? Dan bepaalt deze tekst alles."
+        help="Typ hier je eigen scènes of extra instructies. De geselecteerde voorkeuren worden hier automatisch aan toegevoegd."
     )
 
     if st.button("🖼️ Genereer Ultieme Thumbnail"):
@@ -517,7 +512,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 De AI bouwt de thumbnail op basis van jouw instellingen..."):
+        with st.spinner("🎨 De AI bouwt de thumbnail op basis van jouw specifieke keuzes..."):
             try:
                 # De basis stijlbouwlaag die altijd zorgt voor jouw unieke stickman kanaalstijl
                 basis_kanaal_stijl = (
@@ -527,22 +522,25 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                     "hand-drawn comic book style, thick uneven black outlines. "
                 )
 
-                if gebruik_presets:
-                    # Voeg de keuzemenu's toe aan de prompt
-                    vaste_kanaal_stijl = (
-                        basis_kanaal_stijl +
-                        "RICH ENVIRONMENT REQUIREMENT: Always include a detailed room, background furniture, atmospheric lighting, "
-                        "shadows, and props to make the scene look full and alive. "
-                        f"CHARACTER & EXPRESSION: {karakter_emotie}. "
-                        f"COMPOSITION & FRAMING: {compositie}. "
-                        f"ENVIRONMENT & LIGHTING: {omgeving_sfeer}. "
-                        f"FOCAL ELEMENT: {secundair_element}. "
-                        f"COLOR PALETTE & MOOD: {kleurvibe}. "
-                    )
-                    volledige_prompt = vaste_kanaal_stijl + f" SPECIFIC SCENE CONTENT: {scène_prompt}."
-                else:
-                    # Vrije modus: alleen de basis stijl-guard en jouw volledige eigen prompt
-                    volledige_prompt = basis_kanaal_stijl + f" CUSTOM SCENE DESCRIPTION: {scène_prompt}."
+                # Bouw de specifieke stijl-segmenten alleen als er een keuze is gemaakt
+                stijl_segmenten = [
+                    "RICH ENVIRONMENT REQUIREMENT: Always include a detailed room, background furniture, atmospheric lighting, shadows, and props to make the scene look full and alive."
+                ]
+
+                if emotie_input != geen_voorkeur:
+                    stijl_segmenten.append(f"CHARACTER & EXPRESSION: {emotie_input}.")
+                if compositie_input != geen_voorkeur:
+                    stijl_segmenten.append(f"COMPOSITION & FRAMING: {compositie_input}.")
+                if omgeving_input != geen_voorkeur:
+                    stijl_segmenten.append(f"ENVIRONMENT & LIGHTING: {omgeving_input}.")
+                if element_input != geen_voorkeur:
+                    stijl_segmenten.append(f"FOCAL ELEMENT: {element_input}.")
+                if kleurvibe_input != geen_voorkeur:
+                    stijl_segmenten.append(f"COLOR PALETTE & MOOD: {kleurvibe_input}.")
+
+                # Voeg alle actieve stijlsegmenten samen tot één dwingende opdracht
+                volledige_stijl_pantser = basis_kanaal_stijl + " ".join(stijl_segmenten)
+                volledige_prompt = volledige_stijl_pantser + f" SPECIFIC SCENE CONTENT: {scène_prompt}."
 
                 response = client.images.generate(
                     model="gpt-image-2-2026-04-21",
