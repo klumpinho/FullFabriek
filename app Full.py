@@ -411,11 +411,11 @@ elif huidige_pagina == "📝 Beschrijving Generator":
                 st.error(f"Er ging iets mis met de API: {e}")
 
 # ==========================================
-# TOOL 5: ULTIEME GECONTROLEERDE AI THUMBNAIL GENERATOR
+# TOOL 5: ULTIEME GECONTROLEERDE AI THUMBNAIL GENERATOR (ANTI-AI-GLOSS EDITIONS)
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.title("🖼️ Ultieme Gecontroleerde AI Thumbnail Generator")
-    st.write("Bouw killer-thumbnails met maximale consistentie per bouwsteen, of laat de AI vrij.")
+    st.write("Bouw professionele thumbnails met ingebouwde filters tegen 'goedkope AI'-fouten.")
 
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_ultimate_thumbnail")
     
@@ -423,7 +423,6 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.subheader("🛠️ Kanaal & Stijl Controle-panel")
     st.write("Selecteer per categorie een specifieke stijl, of kies 'Geen voorkeur' voor creatieve vrijheid van de AI.")
 
-    # Kolommen voor de 5 stuurmenu's
     col1, col2 = st.columns(2)
     
     geen_voorkeur = "— (Geen specifieke voorkeur)"
@@ -497,9 +496,9 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
     
     scène_prompt = st.text_area(
         "Wat is de gedetailleerde scène-beschrijving?", 
-        value="A post showing a funny transformation picture on screen, in the background at 50% visibility the word 'Loser'",
+        value="standing in the middle of a room, full panicmode, dramatic directional light shining on the main character",
         height=120,
-        help="Typ hier je eigen scènes of extra instructies. De geselecteerde voorkeuren worden hier automatisch aan toegevoegd."
+        help="Typ hier je eigen scène. Het anti-AI stijlpantser beschermt automatisch tegen vervormde gezichten en glans."
     )
 
     if st.button("🖼️ Genereer Ultieme Thumbnail"):
@@ -512,19 +511,19 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 De AI bouwt de thumbnail op basis van jouw specifieke keuzes..."):
+        with st.spinner("🎨 De AI bouwt de thumbnail met ingebouwde kwaliteitsfilters..."):
             try:
-                # De basis stijlbouwlaag die altijd zorgt voor jouw unieke stickman kanaalstijl
+                # De gebalanceerde stijl-code (terug naar de magie van de eerste blauwe versie)
                 basis_kanaal_stijl = (
                     "STRICT CHANNEL STYLE GUIDE: "
                     "Ultra-sharp 2D minimalist black line art, vector clean lines, high resolution, crisp focus, "
-                    "exact same character design with simple round white head and dot eyes, "
-                    "hand-drawn comic book style, thick uneven black outlines. "
+                    "matte finish, no glossy plastic look. "
+                    "Exact same main character design with simple round white head and dot eyes, hand-drawn comic book style, thick uneven black outlines. "
+                    "BACKGROUND RULE: Natural, lively background crowd with varied character designs and atmospheric lighting, keeping the visual focus entirely on the panicked main character in the center. "
                 )
 
-                # Bouw de specifieke stijl-segmenten alleen als er een keuze is gemaakt
                 stijl_segmenten = [
-                    "RICH ENVIRONMENT REQUIREMENT: Always include a detailed room, background furniture, atmospheric lighting, shadows, and props to make the scene look full and alive."
+                    "RICH ENVIRONMENT REQUIREMENT: Use directional lighting, heavy atmospheric shadows to mask imperfections, and detailed props to make the scene look full and alive."
                 ]
 
                 if emotie_input != geen_voorkeur:
@@ -538,7 +537,6 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 if kleurvibe_input != geen_voorkeur:
                     stijl_segmenten.append(f"COLOR PALETTE & MOOD: {kleurvibe_input}.")
 
-                # Voeg alle actieve stijlsegmenten samen tot één dwingende opdracht
                 volledige_stijl_pantser = basis_kanaal_stijl + " ".join(stijl_segmenten)
                 volledige_prompt = volledige_stijl_pantser + f" SPECIFIC SCENE CONTENT: {scène_prompt}."
 
@@ -560,13 +558,13 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
                 image_stream = io.BytesIO(img_data)
                 
-                st.success("BINGO! 🎉 Jouw thumbnail is klaar!")
+                st.success("BINGO! 🎉 Jouw geharde thumbnail is klaar!")
                 st.image(image_stream, caption="Gegenereerde Thumbnail", use_container_width=True)
 
                 st.download_button(
                     label="📥 Download YouTube Thumbnail (JPG)",
                     data=img_data,
-                    file_name="Ultimate_Thumbnail.jpg",
+                    file_name="Protected_Thumbnail.jpg",
                     mime="image/jpeg"
                 )
 
