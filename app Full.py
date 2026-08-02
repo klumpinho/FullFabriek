@@ -505,8 +505,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                     "exact same character design with simple round white head and dot eyes, "
                     "hand-drawn comic book style, thick uneven black outlines. "
                     "RICH ENVIRONMENT REQUIREMENT: Always include a detailed room, background furniture, atmospheric lighting, "
-                    "shadows, and props to make the scene look full and alive (like a complete cinematic desk setup or room). "
-                    "NO blurry lines, NO soft airbrushing, NO text, NO letters, NO words in the image. "
+                    "shadows, and props to make the scene look full and alive. "
                     f"CHARACTER & EXPRESSION: {karakter_emotie}. "
                     f"COMPOSITION & FRAMING: {compositie}. "
                     f"ENVIRONMENT & LIGHTING: {omgeving_sfeer}. "
@@ -514,7 +513,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                     f"COLOR PALETTE & MOOD: {kleurvibe}. "
                 )
 
-                volledige_prompt = vaste_kanaal_stijl + f" SPECIFIC SCENE CONTENT: {scène_prompt}. Remember: full detailed environment, rich background, absolutely no text."
+                volledige_prompt = vaste_kanaal_stijl + f" SPECIFIC SCENE CONTENT: {scène_prompt}."
 
                 response = client.images.generate(
                     model="gpt-image-2-2026-04-21",
