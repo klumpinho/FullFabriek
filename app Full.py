@@ -14,7 +14,7 @@ st.set_page_config(layout="wide", page_title="De Film Fabriek")
 # NAVIGATIE MENU (SIDEBAR)
 # ==========================================
 st.sidebar.title("🛠️ The Film Creator")
-huidige_pagina = st.sidebar.radio("Kies je tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Fabriek"])
+huidige_pagina = st.sidebar.radio("Kies je tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Fabriek", "📝 Beschrijving Generator"])
 st.sidebar.markdown("***")
 st.sidebar.info("Let the editor use their own OpenAI API key. Voice-overs are securely handled internally.")
 
@@ -318,3 +318,92 @@ elif huidige_pagina == "🎙️ Voice-over Studio":
                 )
             else:
                 st.error(f"Something went wrong with ElevenLabs: {response.text}")
+
+# ==========================================
+# TOOL 4: DE BESCHRIJVING GENERATOR
+# ==========================================
+elif huidige_pagina == "📝 Beschrijving Generator":
+    st.title("YouTube Beschrijving & Hoofdstukken")
+    st.write("Upload de definitieve video en de AI genereert een perfecte beschrijving met timestamps en disclaimers.")
+
+    # We gebruiken dezelfde API key input stijl als in je andere tools
+    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_desc")
+    
+    st.info("Let op: OpenAI accepteert bestanden tot maximaal 25MB. Als de MP4 te groot is, laat je editor dan een .mp3 of lage-kwaliteit .mp4 exporteren voor deze tool.")
+    uploaded_file = st.file_uploader("Upload je MP4 (of MP3) video bestand:", type=["mp4", "mp3", "m4a", "wav"])
+
+    if st.button("📝 Genereer Beschrijving"):
+        if not user_api_key:
+            st.error("Please enter an API key!")
+            st.stop()
+        if not uploaded_file:
+            st.warning("Upload eerst een bestand.")
+            st.stop()
+
+        # Check of het bestand niet groter is dan de 25MB limiet van OpenAI
+        if uploaded_file.size > 25 * 1024 * 1024:
+            st.error("Dit bestand is groter dan 25MB. Comprimeer de video of upload alleen het audiospoor (.mp3).")
+            st.stop()
+
+        client = OpenAI(api_key=user_api_key)
+
+        with st.spinner("🎧 Video aan het scannen voor timestamps... (Dit kan even duren)"):
+            try:
+                # 1. Stuur de audio/video naar Whisper voor een transcriptie met timestamps (SRT)
+                transcript_response = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=uploaded_file,
+                    response_format="srt"
+                )
+                
+                st.success("Timestamps succesvol uitgelezen! Nu de beschrijving schrijven...")
+
+                # 2. Geef de exacte structuur door aan GPT-4o
+                system_prompt = f"""
+                Act as an expert YouTube strategist. Here is the SRT transcription (including exact timestamps) of a YouTube video:
+
+                {transcript_response}
+
+                Based on this transcript, generate a YouTube description EXACTLY matching this structure:
+
+                [Write a compelling 2-3 paragraph summary of the video here in English]
+
+                👇 What you will learn in this video:
+                [List 4-5 key takeaways based on the video content]
+
+                ⏱️ Chapters:
+                0:00 - [Catchy Intro Title]
+                [Extract relevant chapters and their timestamps from the SRT data. Format exactly like 'M:SS - Title' or 'MM:SS - Title']
+
+                [Add 5-7 relevant hashtags here, e.g., #Psychology #SelfImprovement]
+
+                ⚠️ Disclaimer: I am not a licensed psychologist or medical professional. Everything in this video is based on psychological studies, behavioral research, and personal self-improvement experiments. If you are struggling with severe social anxiety or mental health issues, please consult a qualified therapist or doctor. The goal of this video is to inform, inspire, and help you build better communication habits safely and sustainably. Remember: It's not about faking intelligence to impress others; it's about developing real self-awareness to elevate your life.
+
+                📜 Copyright Disclaimer:All content in this video is intended solely for educational and informational purposes. Simple, Actually does not claim ownership of any copyrighted material used in this content. All media, including images, videos, music, and clips, are used under the guidelines of Fair Use for commentary, criticism, teaching, research, and transformative use. If you are the copyright owner of any material used and believe it has been used improperly, please contact us directly. We will be happy to resolve the issue.
+                """
+
+                with st.spinner("✍️ Definitieve tekst aan het genereren..."):
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": "You strictly follow formatting rules and output English text."},
+                            {"role": "user", "content": system_prompt}
+                        ],
+                        temperature=0.7
+                    )
+                    
+                    final_description = response.choices[0].message.content
+                    
+                    st.success("BINGO! 🎉 Jouw YouTube beschrijving is klaar.")
+                    
+                    st.text_area("Resultaat (Kopieer dit direct naar YouTube):", value=final_description, height=500)
+                    
+                    st.download_button(
+                        label="📥 Download als .txt",
+                        data=final_description,
+                        file_name="YouTube_Description.txt",
+                        mime="text/plain"
+                    )
+
+            except Exception as e:
+                st.error(f"Er ging iets mis met de API: {e}")
