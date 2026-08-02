@@ -411,51 +411,109 @@ elif huidige_pagina == "📝 Beschrijving Generator":
                 st.error(f"Er ging iets mis met de API: {e}")
 
 # ==========================================
-# TOOL 5: GECONTROLEERDE AI THUMBNAIL GENERATOR
+# TOOL 5: ULTIEME GECONTROLEERDE AI THUMBNAIL GENERATOR
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
-    st.title("🖼️ Gecontroleerde AI Thumbnail Generator")
-    st.write("Genereer complexe scènes met maximale stijl-consistentie voor jouw kanaal.")
+    st.title("🖼️ Ultieme Gecontroleerde AI Thumbnail Generator")
+    st.write("Bouw killer-thumbnails met maximale stijl-consistentie door de bouwstenen hieronder in te stellen.")
 
-    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_thumbnail_controlled")
+    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_ultimate_thumbnail")
     
-    # Keuzes voor extra vooraf ingestelde controle
-    col1, col2 = st.columns(2)
-    with col1:
-        sfeer_kleur = st.selectbox("Vaste achtergrondstijl / Kleurvibe:", ["High-contrast Wit", "YouTube Geel", "Strak Blauw", "Donker / Criminologie Vibe"])
-    with col2:
-        compositie = st.selectbox("Compositie van de karakters:", ["Hoofdpersonage rechts in beeld", "Personages centraal", "Twee figuren tegenover elkaar"])
+    st.markdown("---")
+    st.subheader("🛠️ Kanaal & Stijl Controle-panel")
 
-    # Het tekstvak voor je unieke scène
+    # Kolommen voor de 5 stuurmenu's
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        karakter_emotie = st.selectbox(
+            "1. Hoofdkarakter & Emotie:", 
+            [
+                "Geschrokken / Ogen groot (Shocked & wide-eyed)",
+                "Woedend / Gefrustreerd (Angry & yelling)",
+                "Paniekerig / Zweetdruppels (Panicked & sweating)",
+                "Geconcentreerd / Nerd (Focused & typing)",
+                "Nadenkend / Hand onder kin (Thinking)"
+            ]
+        )
+        
+        omgeving_sfeer = st.selectbox(
+            "3. Omgeving & Sfeer:", 
+            [
+                "Donkere kamer / Schermlicht (Dark room lit only by monitor)",
+                "Strakke kantoor / Studio (Clean minimal office)",
+                "Felle neon / Cyberpunk vibe (Neon glowing background)",
+                "Effen high-contrast achtergrond (Clean solid color)"
+            ]
+        )
+        
+        kleurvibe = st.selectbox(
+            "5. Kleurvibe (Color Palette):", 
+            [
+                "Cinematic Dark Blue (Donkerblauw / Sfeervol)",
+                "YouTube Pop (Geel & Zwart contrast)",
+                "Tech Sleek (Grijs & Blauw)",
+                "Alert Red (Rood & Donker)"
+            ]
+        )
+
+    with col2:
+        compositie = st.selectbox(
+            "2. Perspectief & Compositie:", 
+            [
+                "Achter bureau / Computer (Desk setup with monitor)",
+                "Close-up van het gezicht (Extreme close-up)",
+                "Van boven / Vogelperspectief (Overhead view)",
+                "Twee personen in beeld (Side-by-side interaction)"
+            ]
+        )
+        
+        secundair_element = st.selectbox(
+            "4. Secundair Element (Focal Point):", 
+            [
+                "Computer / App interface (Monitor showing a UI/post)",
+                "Smartphone in de hand (Holding glowing phone)",
+                "Groot object / Gevaar voor zich (Pointing at object)",
+                "Geen secundair object (Focus purely on character)"
+            ]
+        )
+
+    st.markdown("---")
+    
+    # Het korte tekstvak voor de specifieke unieke scène
     scène_prompt = st.text_area(
-        "Beschrijf wat er in de scène moet gebeuren:", 
-        value="A minimalist stick figure sitting behind a desk looking at the camera, in his study room, another stick figure standing next to him pointing and saying he is a loser",
-        height=130,
-        help="Beschrijf de actie. De unieke tekenstijl van jouw kanaal wordt hier automatisch aan toegevoegd."
+        "Wat is het specifieke onderwerp op het scherm of in de scène?", 
+        value="A post showing a funny transformation picture on screen",
+        height=100,
+        help="Beschrijf kort wat er te zien is (bijv. op het scherm of wat het poppetje meemaakt). De rest van de stijl wordt automatisch afgedwongen."
     )
 
-    if st.button("🖼️ Genereer Gecontroleerde Thumbnail"):
+    if st.button("🖼️ Genereer Ultieme Thumbnail"):
         if not user_api_key:
             st.error("Please enter an OpenAI API key!")
             st.stop()
         if not scène_prompt:
-            st.warning("Vul eerst een scène in!")
+            st.warning("Vul eerst het onderwerp in!")
             st.stop()
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 De AI bouwt de thumbnail volgens jouw vaste kanaalregels..."):
+        with st.spinner("🎨 De AI smeedt jouw thumbnail op basis van de vaste kanaalregels..."):
             try:
-                # Het vaste 'stijlpantser' dat achter de schermen altijd wordt toegepast voor de consistentie
-                vaste_stijl_code = (
+                # Het onbreekbare stijlpantser gekoppeld aan jouw keuzemenu's
+                vaste_kanaal_stijl = (
                     "STRICT CHANNEL STYLE GUIDE: "
                     "Simple 2D minimalist black line drawings, exact same character design with simple round white head and dot eyes, "
-                    "hand-drawn comic book style, thick uneven black outlines, clean high-contrast background colored in " + sfeer_kleur + ", "
-                    "composition rule: " + compositie + ", "
+                    "hand-drawn comic book style, thick uneven black outlines, high-contrast professional lighting. "
+                    f"CHARACTER & EXPRESSION: {karakter_emotie}. "
+                    f"COMPOSITION & FRAMING: {compositie}. "
+                    f"ENVIRONMENT & LIGHTING: {omgeving_sfeer}. "
+                    f"FOCAL ELEMENT: {secundair_element}. "
+                    f"COLOR PALETTE & MOOD: {kleurvibe}. "
                     "NO realistic human faces, NO photo realism, NO 3D rendering, NO complex digital shading. "
                 )
 
-                volledige_prompt = vaste_stijl_code + " SCENE: " + scène_prompt
+                volledige_prompt = vaste_kanaal_stijl + f" SPECIFIC SCENE CONTENT: {scène_prompt}"
 
                 response = client.images.generate(
                     model="gpt-image-2", 
@@ -475,15 +533,15 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
                 image_stream = io.BytesIO(img_data)
                 
-                st.success("BINGO! 🎉 Jouw consistente thumbnail is klaar!")
-                st.image(image_stream, caption="Gegenereerde Thumbnail met vaste kanaalstijl", use_container_width=True)
+                st.success("BINGO! 🎉 Jouw gecontroleerde thumbnail is klaar!")
+                st.image(image_stream, caption="Gegenereerde Thumbnail", use_container_width=True)
 
                 st.download_button(
                     label="📥 Download YouTube Thumbnail (JPG)",
                     data=img_data,
-                    file_name="Consistent_Thumbnail.jpg",
+                    file_name="Ultimate_Thumbnail.jpg",
                     mime="image/jpeg"
                 )
 
             except Exception as e:
-                st.error(f"Er ging iets mis met het genereren van de thumbnail: {e}")
+                st.error(f"Er ging iets mis bij het genereren: {e}")
