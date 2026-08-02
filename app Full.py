@@ -411,23 +411,30 @@ elif huidige_pagina == "📝 Beschrijving Generator":
                 st.error(f"Er ging iets mis met de API: {e}")
 
 # ==========================================
-# TOOL 5: AI THUMBNAIL GENERATOR
+# TOOL 5: GECONTROLEERDE AI THUMBNAIL GENERATOR
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
-    st.title("🖼️ AI Thumbnail Generator")
-    st.write("Genereer unieke, complete YouTube thumbnails op basis van jouw scène-beschrijving in je eigen getekende stijl.")
+    st.title("🖼️ Gecontroleerde AI Thumbnail Generator")
+    st.write("Genereer complexe scènes met maximale stijl-consistentie voor jouw kanaal.")
 
-    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_thumbnail_ai")
+    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_thumbnail_controlled")
     
-    # Het tekstvak voor jouw uitgebreide scène-beschrijving
+    # Keuzes voor extra vooraf ingestelde controle
+    col1, col2 = st.columns(2)
+    with col1:
+        sfeer_kleur = st.selectbox("Vaste achtergrondstijl / Kleurvibe:", ["High-contrast Wit", "YouTube Geel", "Strak Blauw", "Donker / Criminologie Vibe"])
+    with col2:
+        compositie = st.selectbox("Compositie van de karakters:", ["Hoofdpersonage rechts in beeld", "Personages centraal", "Twee figuren tegenover elkaar"])
+
+    # Het tekstvak voor je unieke scène
     scène_prompt = st.text_area(
-        "Beschrijf je thumbnail scène (in het Engels werkt het best):", 
-        value="Minimalist 2D stick figure sitting behind a desk looking at the camera, in his study room, another stick figure standing next to him saying he is a loser, simple black line art, pure white and high contrast background, high clickthrough youtube thumbnail style",
-        height=150,
-        help="Geef hier gedetailleerd aan wie er in de thumbnail staan, wat ze doen en welke emotie of tekst erbij hoort."
+        "Beschrijf wat er in de scène moet gebeuren:", 
+        value="A minimalist stick figure sitting behind a desk looking at the camera, in his study room, another stick figure standing next to him pointing and saying he is a loser",
+        height=130,
+        help="Beschrijf de actie. De unieke tekenstijl van jouw kanaal wordt hier automatisch aan toegevoegd."
     )
 
-    if st.button("🖼️ Genereer AI Thumbnail"):
+    if st.button("🖼️ Genereer Gecontroleerde Thumbnail"):
         if not user_api_key:
             st.error("Please enter an OpenAI API key!")
             st.stop()
@@ -437,20 +444,22 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 AI is jouw unieke thumbnail aan het tekenen... Dit duurt heel even."):
+        with st.spinner("🎨 De AI bouwt de thumbnail volgens jouw vaste kanaalregels..."):
             try:
-                # De ijzersterke stijl-instructie die de AI dwingt jouw unieke stickman-stijl te gebruiken voor de hele scène
-                master_thumbnail_prompt = (
-                    "Create a high-clickthrough YouTube video thumbnail in 16:9 aspect ratio . "
-                    "STYLE REQUIREMENTS: Simple 2D minimalist black line drawings, hand-drawn comic style, clean high-contrast background . "
-                    "No realistic human faces, no photo realism, no 3D rendering, no smooth digital shading . "
-                    "Keep the main characters consistent as simple line art stick figures . "
-                    f"SCENE TO CREATE: {scène_prompt}"
+                # Het vaste 'stijlpantser' dat achter de schermen altijd wordt toegepast voor de consistentie
+                vaste_stijl_code = (
+                    "STRICT CHANNEL STYLE GUIDE: "
+                    "Simple 2D minimalist black line drawings, exact same character design with simple round white head and dot eyes, "
+                    "hand-drawn comic book style, thick uneven black outlines, clean high-contrast background colored in " + sfeer_kleur + ", "
+                    "composition rule: " + compositie + ", "
+                    "NO realistic human faces, NO photo realism, NO 3D rendering, NO complex digital shading. "
                 )
+
+                volledige_prompt = vaste_stijl_code + " SCENE: " + scène_prompt
 
                 response = client.images.generate(
                     model="gpt-image-2", 
-                    prompt=master_thumbnail_prompt,
+                    prompt=volledige_prompt,
                     size="1792x1024",
                     n=1
                 )
@@ -466,13 +475,13 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
                 image_stream = io.BytesIO(img_data)
                 
-                st.success("BINGO! 🎉 Jouw unieke AI thumbnail is klaar!")
-                st.image(image_stream, caption="Gegenereerde YouTube Thumbnail", use_container_width=True)
+                st.success("BINGO! 🎉 Jouw consistente thumbnail is klaar!")
+                st.image(image_stream, caption="Gegenereerde Thumbnail met vaste kanaalstijl", use_container_width=True)
 
                 st.download_button(
                     label="📥 Download YouTube Thumbnail (JPG)",
                     data=img_data,
-                    file_name="AI_Thumbnail.jpg",
+                    file_name="Consistent_Thumbnail.jpg",
                     mime="image/jpeg"
                 )
 
