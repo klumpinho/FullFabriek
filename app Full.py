@@ -415,97 +415,70 @@ elif huidige_pagina == "📝 Beschrijving Generator":
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.title("🖼️ Thumbnail Compositor")
-    st.write("Bouw in 2 seconden een 100% consistente thumbnail.")
+    st.write("Genereer unieke, op maat gemaakte YouTube thumbnails in je eigen stickman-stijl op basis van je scènes.")
 
-    # Maak automatisch de assets map aan als deze niet bestaat
-    if not os.path.exists("assets"):
-        os.makedirs("assets")
-
-    # 1. De lijst met 15 specifieke emoties / houdingen
-    emoties = [
-        "Blij", "Verward", "Geschrokken", "Boos", "Huilend",
-        "Rennend", "Wijzend", "Nadenkend", "Lachend", "Gefrustreerd",
-        "Slapend", "Verbaasd", "Trots", "Zwaaiend", "Schouderophalend"
-    ]
-    gekozen_emotie = st.selectbox("1. Kies de houding/emotie van je Stickman:", emoties)
-
-    st.markdown("---")
+    # API key invulveld voor OpenAI
+    user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_thumbnail")
     
-    # 2. Achtergrond instellingen
-    bg_keuze = st.radio("2. Kies je achtergrond:", ["Effen Kleur (Snel & Opvallend)", "Upload een achtergrondafbeelding"])
-    bg_color = "#FFCC00" # Standaard YouTube geel
-    bg_image = None
-    
-    if bg_keuze == "Effen Kleur (Snel & Opvallend)":
-        bg_color = st.color_picker("Kies de kleurcode:", "#FFD700")
-    else:
-        bg_image = st.file_uploader("Upload achtergrond (Ideaal 1280x720):", type=["jpg", "png", "jpeg"])
+    # Het tekstvak waar je jouw specifieke scène kunt intypen
+    scène_prompt = st.text_area(
+        "Wat moet er in de thumbnail gebeuren?", 
+        value="Stickman sitting behind a desk looking at the camera, in his study room, another stickman standing next to him saying he is a loser",
+        height=150,
+        help="Beschrijf hier precies de situatie, de emoties en de personages in het Engels."
+    )
 
-    st.markdown("---")
+    if st.button("🖼️ Genereer Unieke Thumbnail"):
+        if not user_api_key:
+            st.error("Please enter an API key!")
+            st.stop()
+        if not scène_prompt:
+            st.warning("Vul eerst een scène in!")
+            st.stop()
 
-    # 3. Tekst Opties (Met mogelijkheid voor "Geen tekst")
-    voeg_tekst_toe = st.checkbox("3. Voeg grote tekst toe aan de thumbnail", value=False)
-    thumbnail_tekst = ""
-    if voeg_tekst_toe:
-        thumbnail_tekst = st.text_input("Typ je clickbait tekst hier:", "SHOCKING TRUTH")
-        st.info("Tip: Upload een lettertype bestand genaamd 'impact.ttf' in je map voor het beste, dikke YouTube-effect.")
+        client = OpenAI(api_key=user_api_key)
 
-    if st.button("🖼️ Genereer Thumbnail"):
-        with st.spinner("Thumbnail aan het bouwen..."):
+        with st.spinner("🎨 AI is je unieke thumbnail aan het tekenen... Dit duurt heel even."):
             try:
-                # A. Maak de achtergrond (1280 x 720 is de YouTube standaard)
-                if bg_image:
-                    bg = Image.open(bg_image).convert("RGBA")
-                    bg = bg.resize((1280, 720))
+                # De 'magische' stijl-instructie die jouw stijl bewaakt, gecombineerd met jouw specifieke scène
+                master_thumbnail_prompt = (
+                    "Create a high-clickthrough YouTube video thumbnail (16:9 aspect ratio) . "
+                    "STYLE REQUIREMENTS: Simple 2D black line drawings, minimalist style, mostly white empty space or clean high-contrast background . "
+                    "Pure white or bold colored background elements, thick uneven black outlines, wobbly hand-drawn comic style . "
+                    "No realistic shading, no 3D, no cinematic lighting, no realistic human faces, no photo realism . "
+                    "Keep compositions extremely clear, bold and centered . "
+                    f"SCENE TO DRAW: {scène_prompt}"
+                )
+
+                response = client.images.generate(
+                    model="gpt-image-2", # Of DALL-E 3, afhankelijk van wat je gewend bent
+                    prompt=master_thumbnail_prompt,
+                    size="1792x1024",
+                    n=1
+                )
+                
+                image_data = response.data[0]
+                
+                if hasattr(image_data, 'url') and image_data.url:
+                    img_data = requests.get(image_data.url).content
+                elif hasattr(image_data, 'b64_json') and image_data.b64_json:
+                    img_data = base64.b64decode(image_data.b64_json)
                 else:
-                    bg = Image.new("RGBA", (1280, 720), bg_color)
+                    raise Exception("Geen afbeelding ontvangen van de API.")
 
-                # B. Laad en plak de stickman
-                stickman_pad = f"assets/{gekozen_emotie.lower()}.png"
-                if os.path.exists(stickman_pad):
-                    stickman = Image.open(stickman_pad).convert("RGBA")
-                    
-                    # Zorg dat de stickman mooi op maat is en zet hem rechts in beeld
-                    stickman.thumbnail((700, 700))
-                    
-                    # Bereken positie: Rechts in het midden
-                    y_pos = (720 - stickman.height) // 2
-                    x_pos = 1200 - stickman.width 
-                    
-                    # Plak de stickman met behoud van transparantie
-                    bg.paste(stickman, (x_pos, y_pos), stickman)
-                else:
-                    st.error(f"⚠️ Stickman niet gevonden! Upload eerst jouw bestand '{gekozen_emotie.lower()}.png' in de 'assets' map op je GitHub.")
-                    st.stop()
+                # Sla tijdelijk op in het geheugen om te tonen
+                image_stream = io.BytesIO(img_data)
+                
+                st.success("BINGO! 🎉 Jouw unieke thumbnail is klaar!")
+                st.image(image_stream, caption="Jouw gegenereerde thumbnail", use_container_width=True)
 
-                # C. Tekst toevoegen (Als de checkbox is aangevinkt)
-                if voeg_tekst_toe and thumbnail_tekst:
-                    draw = ImageDraw.Draw(bg)
-                    
-                    # Probeer Impact te laden, anders een standaard font
-                    try:
-                        font = ImageFont.truetype("impact.ttf", 90)
-                    except:
-                        font = ImageFont.load_default()
-                        st.warning("Standaard lettertype gebruikt. Zet 'impact.ttf' in GitHub voor een dikkere tekst.")
-
-                    # Voeg tekst toe met een strakke zwarte omlijning (stroke)
-                    draw.text((70, 300), thumbnail_tekst, fill="white", font=font, stroke_width=4, stroke_fill="black")
-
-                # D. Toon resultaat
-                st.success("Thumbnail is klaar!")
-                st.image(bg, caption=f"Thumbnail: {gekozen_emotie}")
-
-                # E. Maak downloadbaar
-                buf = io.BytesIO()
-                bg_rgb = bg.convert("RGB")
-                bg_rgb.save(buf, format="JPEG", quality=95)
+                # Download knop
                 st.download_button(
-                    label="📥 Download YouTube Thumbnail",
-                    data=buf.getvalue(),
-                    file_name=f"Thumbnail_{gekozen_emotie}.jpg",
+                    label="📥 Download Thumbnail (JPG)",
+                    data=img_data,
+                    file_name="YouTube_Thumbnail.jpg",
                     mime="image/jpeg"
                 )
 
             except Exception as e:
-                st.error(f"Er ging iets mis tijdens het bouwen: {e}")
+                st.error(f"Er ging iets mis met het genereren van de thumbnail: {e}")
