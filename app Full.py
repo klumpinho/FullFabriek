@@ -415,7 +415,7 @@ elif huidige_pagina == "📝 Beschrijving Generator":
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.title("🖼️ Ultieme Gecontroleerde AI Thumbnail Generator")
-    st.write("Bouw professionele thumbnails met ingebouwde filters tegen 'goedkope AI'-fouten.")
+    st.write("Bouw professionele thumbnails met maximale, chirurgische precisie over elke laag van de afbeelding.")
 
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_ultimate_thumbnail")
     
@@ -423,13 +423,14 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
     st.subheader("🛠️ Kanaal & Stijl Controle-panel")
     st.write("Selecteer per categorie een specifieke stijl, of kies 'Geen voorkeur' voor creatieve vrijheid van de AI.")
 
+    # We maken de layout iets breder met kolommen
     col1, col2 = st.columns(2)
     
     geen_voorkeur = "— (Geen specifieke voorkeur)"
 
     with col1:
         emotie_input = st.selectbox(
-            "1. Hoofdkarakter & Emotie:", 
+            "1. Hoofdkarakter Emotie:", 
             [geen_voorkeur,
                 "Geschrokken / Ogen groot (Shocked & wide-eyed)",
                 "Woedend / Gefrustreerd (Angry & yelling)",
@@ -437,13 +438,22 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 "Geconcentreerd / Nerd (Focused & typing)",
                 "Nadenkend / Hand onder kin (Thinking)",
                 "Arrogant / Zelfverzekerd lachend (Arrogant smirking)",
-                "Doodsbang / Paranoïde (Terrified & paranoid)",
-                "Wijsneus / Uitleggend (Smartass pointing)"
+                "Doodsbang / Paranoïde (Terrified & paranoid)"
             ]
         )
         
+        kleding_input = st.selectbox(
+            "3. Kleding Hoofdkarakter:",
+            [geen_voorkeur,
+                "Standaard (Geen kleding, pure minimalistische stickman)",
+                "Zwarte Hoodie (Hacker / Geïsoleerde vibe)",
+                "Net pak met stropdas (Business / Succes vibe)",
+                "Casual T-shirt (Alledaags)"
+            ]
+        )
+
         omgeving_input = st.selectbox(
-            "3. Omgeving & Sfeer:", 
+            "5. Omgeving & Locatie:", 
             [geen_voorkeur,
                 "Donkere kamer / Schermlicht (Dark room lit only by monitor)",
                 "Strakke kantoor / Studio (Clean minimal office)",
@@ -455,27 +465,26 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
         )
         
         kleurvibe_input = st.selectbox(
-            "5. Kleurvibe (Color Palette):", 
+            "7. Kleurvibe (Color Palette):", 
             [geen_voorkeur,
                 "Cinematic Dark Blue (Donkerblauw / Sfeervol)",
                 "YouTube Pop (Geel & Zwart contrast)",
                 "Tech Sleek (Grijs & Blauw)",
                 "Alert Red (Rood & Donker)",
-                "Matrix Green & Black (Hacker groen)",
-                "Neon Cyberpunk (Paars & Roze neon)"
+                "Matrix Green & Black (Hacker groen)"
             ]
         )
 
     with col2:
         compositie_input = st.selectbox(
-            "2. Perspectief & Compositie:", 
+            "2. Perspectief & Camerahoek:", 
             [geen_voorkeur,
                 "Achter bureau / Computer (Desk setup with monitor)",
                 "Close-up van het gezicht (Extreme close-up)",
                 "Van boven / Vogelperspectief (Overhead view)",
-                "Twee personen in gesprek (Side-by-side interaction)",
+                "Van onderen opgekeken (Low angle dramatic shot)",
                 "Groothoek over de hele kamer (Wide angle room overview)",
-                "Van onderen opgekeken (Low angle dramatic shot)"
+                "Over de schouder meekijken (Over-the-shoulder shot)"
             ]
         )
         
@@ -487,18 +496,44 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 "Groot object / Gevaar voor zich (Pointing at object)",
                 "Grafieken en cijfers die exploderen (Exploding stock charts)",
                 "Lege bureaustoel ernaast (Empty chair next to him)",
-                "Gigantisch vraagteken in de kamer (Giant floating question mark)",
                 "Geen secundair object (Focus purely on character)"
+            ]
+        )
+
+        belichting_input = st.selectbox(
+            "6. Lichtinval & Schaduw:",
+            [geen_voorkeur,
+                "Harde spotlight van boven (Interrogation / Isolation feel)",
+                "Zacht raamlicht van opzij (Soft window light)",
+                "Sterk contrast / Film Noir (Heavy shadows, cinematic)",
+                "Gloeiend licht van onderen (Glowing light from below, eerie)"
+            ]
+        )
+        
+        achtergrond_karakters_input = st.selectbox(
+            "8. Achtergrond Karakters (Crowd Control):",
+            [geen_voorkeur,
+                "Volledig leeg (Absoluut geen andere personen)",
+                "Vage donkere silhouetten (Ominous shadows of people)",
+                "Levendige menigte (Detailed background characters)",
+                "Eén andere persoon op de achtergrond (One specific extra person)"
             ]
         )
 
     st.markdown("---")
     
+    st.subheader("✍️ Handmatige Sturing")
     scène_prompt = st.text_area(
-        "Wat is de gedetailleerde scène-beschrijving?", 
-        value="standing in the middle of a room, full panicmode, dramatic directional light shining on the main character",
-        height=120,
-        help="Typ hier je eigen scène. Het anti-AI stijlpantser beschermt automatisch tegen vervormde gezichten en glans."
+        "A. Wat is de gedetailleerde scène-beschrijving?", 
+        value="standing in the middle of a room, full panicmode",
+        height=80,
+        help="Typ hier je eigen scène. Wat is er specifiek aan de hand?"
+    )
+
+    negatieve_prompt = st.text_input(
+        "B. Wat mag er ABSOLUUT NIET in beeld zijn? (Negatieve prompt)", 
+        value="",
+        help="Bijv: 'tekst, letters, woorden, ramen, planten, realistische gezichten'"
     )
 
     if st.button("🖼️ Genereer Ultieme Thumbnail"):
@@ -511,34 +546,43 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 De AI bouwt de thumbnail met ingebouwde kwaliteitsfilters..."):
+        with st.spinner("🎨 De AI bouwt de thumbnail met jouw exacte specificaties..."):
             try:
-                # De gebalanceerde stijl-code (terug naar de magie van de eerste blauwe versie)
+                # De gebalanceerde stijl-code 
                 basis_kanaal_stijl = (
                     "STRICT CHANNEL STYLE GUIDE: "
                     "Ultra-sharp 2D minimalist black line art, vector clean lines, high resolution, crisp focus, "
                     "matte finish, no glossy plastic look. "
                     "Exact same main character design with simple round white head and dot eyes, hand-drawn comic book style, thick uneven black outlines. "
-                    "BACKGROUND RULE: Natural, lively background crowd with varied character designs and atmospheric lighting, keeping the visual focus entirely on the panicked main character in the center. "
                 )
 
-                stijl_segmenten = [
-                    "RICH ENVIRONMENT REQUIREMENT: Use directional lighting, heavy atmospheric shadows to mask imperfections, and detailed props to make the scene look full and alive."
-                ]
+                stijl_segmenten = []
 
+                # Voeg alle gemaakte keuzes toe
                 if emotie_input != geen_voorkeur:
-                    stijl_segmenten.append(f"CHARACTER & EXPRESSION: {emotie_input}.")
+                    stijl_segmenten.append(f"CHARACTER EMOTION: {emotie_input}.")
+                if kleding_input != geen_voorkeur:
+                    stijl_segmenten.append(f"CHARACTER CLOTHING: {kleding_input}.")
                 if compositie_input != geen_voorkeur:
-                    stijl_segmenten.append(f"COMPOSITION & FRAMING: {compositie_input}.")
+                    stijl_segmenten.append(f"CAMERA COMPOSITION: {compositie_input}.")
                 if omgeving_input != geen_voorkeur:
-                    stijl_segmenten.append(f"ENVIRONMENT & LIGHTING: {omgeving_input}.")
+                    stijl_segmenten.append(f"ENVIRONMENT: {omgeving_input}.")
                 if element_input != geen_voorkeur:
                     stijl_segmenten.append(f"FOCAL ELEMENT: {element_input}.")
+                if belichting_input != geen_voorkeur:
+                    stijl_segmenten.append(f"LIGHTING & SHADOWS: {belichting_input}.")
                 if kleurvibe_input != geen_voorkeur:
-                    stijl_segmenten.append(f"COLOR PALETTE & MOOD: {kleurvibe_input}.")
+                    stijl_segmenten.append(f"COLOR PALETTE: {kleurvibe_input}.")
+                if achtergrond_karakters_input != geen_voorkeur:
+                    stijl_segmenten.append(f"BACKGROUND CROWD RULE: {achtergrond_karakters_input}.")
+
+                # Koppel de negatieve prompt er hard aan vast als deze is ingevuld
+                anti_prompt = ""
+                if negatieve_prompt.strip():
+                    anti_prompt = f" CRITICAL AVOIDANCE INSTRUCTIONS: You must absolutely NOT include any of the following elements in the image under any circumstances: {negatieve_prompt}."
 
                 volledige_stijl_pantser = basis_kanaal_stijl + " ".join(stijl_segmenten)
-                volledige_prompt = volledige_stijl_pantser + f" SPECIFIC SCENE CONTENT: {scène_prompt}."
+                volledige_prompt = volledige_stijl_pantser + f" SPECIFIC SCENE CONTENT: {scène_prompt}." + anti_prompt
 
                 response = client.images.generate(
                     model="gpt-image-2-2026-04-21",
@@ -558,13 +602,13 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
                 image_stream = io.BytesIO(img_data)
                 
-                st.success("BINGO! 🎉 Jouw geharde thumbnail is klaar!")
+                st.success("BINGO! 🎉 Jouw uiterst gecontroleerde thumbnail is klaar!")
                 st.image(image_stream, caption="Gegenereerde Thumbnail", use_container_width=True)
 
                 st.download_button(
                     label="📥 Download YouTube Thumbnail (JPG)",
                     data=img_data,
-                    file_name="Protected_Thumbnail.jpg",
+                    file_name="Ultimate_Controlled_Thumbnail.jpg",
                     mime="image/jpeg"
                 )
 
