@@ -6,35 +6,35 @@ import base64
 from openai import OpenAI
 import zipfile
 import io
-# Hier staat de nieuwe import nu veilig bij de rest!
+# Here the new import is safely placed with the rest!
 from PIL import Image, ImageDraw, ImageFont
 
-# We stellen de pagina in op 'wide' zodat je lekker veel ruimte hebt
-st.set_page_config(layout="wide", page_title="De Film Fabriek")
+# We set the page to 'wide' so you have plenty of space
+st.set_page_config(layout="wide", page_title="The Film Factory")
 
 # ==========================================
-# NAVIGATIE MENU (SIDEBAR)
+# NAVIGATION MENU (SIDEBAR)
 # ==========================================
 st.sidebar.title("🛠️ The Film Creator")
-huidige_pagina = st.sidebar.radio("Kies je tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Fabriek", "📝 Beschrijving Generator", "🖼️ Thumbnail Compositor"])
+huidige_pagina = st.sidebar.radio("Choose your tool:", ["✍️ Script Generator", "🎙️ Voice-over Studio", "🎬 Storyboard Factory", "📝 Description Generator", "🖼️ Thumbnail Compositor"])
 st.sidebar.markdown("***")
 st.sidebar.info("Let the editor use their own OpenAI API key. Voice-overs are securely handled internally.")
 
 
 # ==========================================
-# TOOL 1: DE SCRIPT GENERATOR
+# TOOL 1: THE SCRIPT GENERATOR
 # ==========================================
 if huidige_pagina == "✍️ Script Generator":
     st.title("YouTube Script Creator PRO")
     st.write("Generate perfect, ElevenLabs-ready scripts based on your bullet points.")
     
-    # API key invulveld voor de editor
+    # API key input field for the editor
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_script")
     
-    # Velden voor de video details
+    # Fields for the video details
     video_titel = st.text_input("Title of your video:")
     
-    # Nieuw: Input voor het gewenste aantal woorden
+    # New: Input for the desired word count
     target_words = st.number_input("Target Word Count (approximate):", min_value=200, max_value=5000, value=1200, step=100)
     
     default_bullets = "- Point 1: ...\n- Point 2: ...\n- Point 3: ..."
@@ -50,7 +50,7 @@ if huidige_pagina == "✍️ Script Generator":
             
         client = OpenAI(api_key=user_api_key)
         
-        # De prompt is geüpdatet met de target_words variabele
+        # The prompt is updated with the target_words variable
         system_prompt = f"""
         You are writing a script for an animated stickman YouTube channel. The tone MUST be incredibly conversational, raw, and human. Imagine you are explaining deep psychology to a close friend over a cup of coffee. It must sound like real life advice. NOT a formal presentation, NOT a slideshow, and NOT a classroom lecture. 
 
@@ -92,21 +92,21 @@ if huidige_pagina == "✍️ Script Generator":
                 )
                 script_content = response.choices[0].message.content
                 
-                # ELEVENLABS CLEANUP: Hier strippen we geforceerd alle overgebleven aanhalingstekens en streepjes eruit via Python
+                # ELEVENLABS CLEANUP: Here we forcefully strip all remaining quotes and dashes via Python
                 script_content = script_content.replace('"', '').replace("'", "").replace("“", "").replace("”", "").replace("‘", "").replace("’", "").replace("-", " ")
                 
-                # Bereken het daadwerkelijke aantal woorden
+                # Calculate the actual word count
                 actual_word_count = len(script_content.split())
                 
                 st.success("BINGO! 🎉 Your script has been successfully written!")
                 
-                # Toon de woordenteller aan de editor
+                # Show the word counter to the editor
                 st.info(f"📊 Final Script Length: **{actual_word_count} words** (Target was {target_words})")
                 
-                # Toon het script zodat de editor het makkelijk kan kopiëren
+                # Show the script so the editor can easily copy it
                 st.text_area("Result (Copy this directly into ElevenLabs):", value=script_content, height=400)
                 
-                # Voeg direct een knop toe om het als .txt te downloaden
+                # Add a button directly to download it as a .txt file
                 st.download_button(
                     label="📥 Download as .txt file",
                     data=script_content,
@@ -119,9 +119,9 @@ if huidige_pagina == "✍️ Script Generator":
 
 
 # ==========================================
-# TOOL 2: DE STORYBOARD FABRIEK
+# TOOL 2: THE STORYBOARD FACTORY
 # ==========================================
-elif huidige_pagina == "🎬 Storyboard Fabriek":
+elif huidige_pagina == "🎬 Storyboard Factory":
     st.title("Generate Stickman Images For Your Videos")
     st.write("The factory is running! Enter your API key, paste your script, and let's create.")
 
@@ -136,7 +136,7 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
 
     script_text = st.text_area("Paste here your script:", height=250)
 
-    # Handige functie voor de ZIP file download
+    # Handy function for the ZIP file download
     def create_zip(images):
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zip_file:
@@ -153,10 +153,10 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
             st.stop()
 
         client = OpenAI(api_key=user_api_key)
-        OUTPUT_DIR = "Gegeneerde_Film"
+        OUTPUT_DIR = "Generated_Film"
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         
-        # Reset of maak een nieuwe lijst aan voor de bytes van de afbeeldingen (voor de ZIP-knop)
+        # Reset or create a new list for the image bytes (for the ZIP button)
         st.session_state.image_bytes_list = []
         
         with st.spinner("AI is analyzing script length to determine optimal scene count..."):
@@ -164,7 +164,7 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
                 word_count = len(script_text.split())
                 target_scenes = max(15, min(100, word_count // 8)) 
                 
-                # Hier herstellen we de originele instructie om er een JSON lijst van te maken
+                # Here we restore the original instruction to make it a JSON list
                 storyboard_prompt = (
                     f"Analyze the following script: {script_text}\n\n"
                     f"CRITICAL INSTRUCTION: Your target is to create approximately {target_scenes} scenes. "
@@ -191,17 +191,17 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
 
         progress_bar = st.progress(0)
         
-        # We maken even kolommen aan zodat de plaatjes mooi op het scherm passen
+        # Let's create some columns so the images fit nicely on the screen
         cols = st.columns(3) 
         
         for i, scene in enumerate(scenes):
             actie_prompt = scene["description"]
             bestandsnaam = f"{i+1:03d}_youtube.jpg"
             
-            # Voeg een st.spinner of status update toe
+            # Add a st.spinner or status update
             st.write(f"🎨 Generating image {i+1}: {actie_prompt}")
             
-            # De originele 'magische' prompt uit jouw lokale Filmfabriek!
+            # The original 'magic' prompt from your local Film Factory!
             image_prompt = (
                 "Generate a YouTube video illustration (16:9) . "
                 "STYLE REQUIREMENTS: Simple 2D black line drawings, mostly white empty space . "
@@ -228,16 +228,16 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
                 elif hasattr(image_data, 'b64_json') and image_data.b64_json:
                     img_data = base64.b64decode(image_data.b64_json)
                 else:
-                    raise Exception("Geen afbeelding ontvangen van de API.")
+                    raise Exception("No image received from the API.")
                 
-                # Opslaan in de map (als backup)
+                # Save to folder (as backup)
                 with open(doel_pad, 'wb') as handler:
                     handler.write(img_data)
                 
-                # Opslaan in het geheugen voor de ZIP download knop
+                # Save in memory for the ZIP download button
                 st.session_state.image_bytes_list.append(img_data)
                 
-                # Teken in een van de drie kolommen
+                # Draw in one of the three columns
                 cols[i % 3].image(doel_pad, caption=f"Scene {i+1}")
                 
             except Exception as e:
@@ -247,7 +247,7 @@ elif huidige_pagina == "🎬 Storyboard Fabriek":
 
         st.success("Production Finished! 🎉")
         
-        # De download-all ZIP knop verschijnt zodra alles klaar is
+        # The download-all ZIP button appears once everything is ready
         if 'image_bytes_list' in st.session_state and len(st.session_state.image_bytes_list) > 0:
             zip_data = create_zip(st.session_state.image_bytes_list)
             st.download_button(
@@ -264,15 +264,15 @@ elif huidige_pagina == "🎙️ Voice-over Studio":
     st.title("🎙️ Voice-over Studio")
     st.write("Convert the generated script directly into an ElevenLabs voice-over.")
     
-    # Haal de veilige sleutel op uit Streamlit Secrets
+    # Get the secure key from Streamlit Secrets
     try:
         elevenlabs_key = st.secrets["ELEVENLABS_API_KEY"]
     except:
         st.error("API key not found in Streamlit Secrets. Please contact the administrator.")
         st.stop()
         
-    # Vul hier de Voice ID in van de stem die je altijd gebruikt voor je video's
-    # (Je vindt deze ID op de website van ElevenLabs in de Voice Library/Lab)
+    # Enter the Voice ID of the voice you always use for your videos here
+    # (You can find this ID on the ElevenLabs website in the Voice Library/Lab)
     VOICE_ID = "VZcBEw9QXVSghzV5UKLN" 
     
     script_to_read = st.text_area("Paste the final script here:", height=300)
@@ -292,7 +292,7 @@ elif huidige_pagina == "🎙️ Voice-over Studio":
                 "xi-api-key": elevenlabs_key
             }
             
-            # Zorg dat de 'd' van data precies onder de 'h' van headers staat!
+            # Make sure the 'd' of data is exactly under the 'h' of headers!
             data = {
                 "text": script_to_read,
                 "model_id": "eleven_multilingual_v2", 
@@ -308,10 +308,10 @@ elif huidige_pagina == "🎙️ Voice-over Studio":
                 audio_bytes = response.content
                 st.success("BINGO! 🎉 Audio generated successfully!")
                 
-                # Laat de audio direct in de browser afspelen
+                # Play the audio directly in the browser
                 st.audio(audio_bytes, format="audio/mp3")
                 
-                # Voeg een downloadknop toe voor de editor
+                # Add a download button for the editor
                 st.download_button(
                     label="📥 Download Voice-over (MP3)",
                     data=audio_bytes,
@@ -322,45 +322,45 @@ elif huidige_pagina == "🎙️ Voice-over Studio":
                 st.error(f"Something went wrong with ElevenLabs: {response.text}")
 
 # ==========================================
-# TOOL 4: DE BESCHRIJVING GENERATOR
+# TOOL 4: THE DESCRIPTION GENERATOR
 # ==========================================
-elif huidige_pagina == "📝 Beschrijving Generator":
-    st.title("YouTube Beschrijving & Hoofdstukken")
-    st.write("Upload de definitieve video en de AI genereert een perfecte beschrijving met timestamps en disclaimers.")
+elif huidige_pagina == "📝 Description Generator":
+    st.title("YouTube Description & Chapters")
+    st.write("Upload the final video and the AI will generate a perfect description with timestamps and disclaimers.")
 
-    # We gebruiken dezelfde API key input stijl als in je andere tools
+    # We use the same API key input style as in your other tools
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_desc")
     
-    st.info("Let op: OpenAI accepteert bestanden tot maximaal 25MB. Als de MP4 te groot is, laat je editor dan een .mp3 of lage-kwaliteit .mp4 exporteren voor deze tool.")
-    uploaded_file = st.file_uploader("Upload je MP4 (of MP3) video bestand:", type=["mp4", "mp3", "m4a", "wav"])
+    st.info("Note: OpenAI accepts files up to a maximum of 25MB. If the MP4 is too large, have your editor export an .mp3 or low-quality .mp4 for this tool.")
+    uploaded_file = st.file_uploader("Upload your MP4 (or MP3) video file:", type=["mp4", "mp3", "m4a", "wav"])
 
-    if st.button("📝 Genereer Beschrijving"):
+    if st.button("📝 Generate Description"):
         if not user_api_key:
             st.error("Please enter an API key!")
             st.stop()
         if not uploaded_file:
-            st.warning("Upload eerst een bestand.")
+            st.warning("Please upload a file first.")
             st.stop()
 
-        # Check of het bestand niet groter is dan de 25MB limiet van OpenAI
+        # Check if the file is not larger than the 25MB limit of OpenAI
         if uploaded_file.size > 25 * 1024 * 1024:
-            st.error("Dit bestand is groter dan 25MB. Comprimeer de video of upload alleen het audiospoor (.mp3).")
+            st.error("This file is larger than 25MB. Compress the video or upload only the audio track (.mp3).")
             st.stop()
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎧 Video aan het scannen voor timestamps... (Dit kan even duren)"):
+        with st.spinner("🎧 Scanning video for timestamps... (This may take a while)"):
             try:
-                # 1. Stuur de audio/video naar Whisper voor een transcriptie met timestamps (SRT)
+                # 1. Send the audio/video to Whisper for a transcription with timestamps (SRT)
                 transcript_response = client.audio.transcriptions.create(
                     model="whisper-1",
                     file=uploaded_file,
                     response_format="srt"
                 )
                 
-                st.success("Timestamps succesvol uitgelezen! Nu de beschrijving schrijven...")
+                st.success("Timestamps successfully extracted! Now writing the description...")
 
-                # 2. Geef de exacte structuur door aan GPT-4o
+                # 2. Pass the exact structure to GPT-4o
                 system_prompt = f"""
                 Act as an expert YouTube strategist. Here is the SRT transcription (including exact timestamps) of a YouTube video:
 
@@ -384,7 +384,7 @@ elif huidige_pagina == "📝 Beschrijving Generator":
                 📜 Copyright Disclaimer:All content in this video is intended solely for educational and informational purposes. ItsAllGoodda does not claim ownership of any copyrighted material used in this content. All media, including images, videos, music, and clips, are used under the guidelines of Fair Use for commentary, criticism, teaching, research, and transformative use. If you are the copyright owner of any material used and believe it has been used improperly, please contact us directly. We will be happy to resolve the issue.
                 """
 
-                with st.spinner("✍️ Definitieve tekst aan het genereren..."):
+                with st.spinner("✍️ Generating final text..."):
                     response = client.chat.completions.create(
                         model="gpt-4o",
                         messages=[
@@ -396,159 +396,159 @@ elif huidige_pagina == "📝 Beschrijving Generator":
                     
                     final_description = response.choices[0].message.content
                     
-                    st.success("BINGO! 🎉 Jouw YouTube beschrijving is klaar.")
+                    st.success("BINGO! 🎉 Your YouTube description is ready.")
                     
-                    st.text_area("Resultaat (Kopieer dit direct naar YouTube):", value=final_description, height=500)
+                    st.text_area("Result (Copy this directly to YouTube):", value=final_description, height=500)
                     
                     st.download_button(
-                        label="📥 Download als .txt",
+                        label="📥 Download as .txt",
                         data=final_description,
                         file_name="YouTube_Description.txt",
                         mime="text/plain"
                     )
 
             except Exception as e:
-                st.error(f"Er ging iets mis met de API: {e}")
+                st.error(f"Something went wrong with the API: {e}")
 
 # ==========================================
-# TOOL 5: ULTIEME GECONTROLEERDE AI THUMBNAIL GENERATOR (ANTI-AI-GLOSS EDITIONS)
+# TOOL 5: ULTIMATE CONTROLLED AI THUMBNAIL GENERATOR (ANTI-AI-GLOSS EDITIONS)
 # ==========================================
 elif huidige_pagina == "🖼️ Thumbnail Compositor":
-    st.title("🖼️ Ultieme Gecontroleerde AI Thumbnail Generator")
-    st.write("Bouw professionele thumbnails met maximale, chirurgische precisie over elke laag van de afbeelding.")
+    st.title("🖼️ Ultimate Controlled AI Thumbnail Generator")
+    st.write("Build professional thumbnails with maximum, surgical precision over every layer of the image.")
 
     user_api_key = st.text_input("Paste your OpenAI API key here:", type="password", key="api_key_ultimate_thumbnail")
     
     st.markdown("---")
-    st.subheader("🛠️ Kanaal & Stijl Controle-panel")
-    st.write("Selecteer per categorie een specifieke stijl, of kies 'Geen voorkeur' voor creatieve vrijheid van de AI.")
+    st.subheader("🛠️ Channel & Style Control Panel")
+    st.write("Select a specific style per category, or choose 'No preference' for creative freedom from the AI.")
 
-    # We maken de layout iets breder met kolommen
+    # We make the layout a bit wider with columns
     col1, col2 = st.columns(2)
     
-    geen_voorkeur = "— (Geen specifieke voorkeur)"
+    geen_voorkeur = "— (No specific preference)"
 
     with col1:
         emotie_input = st.selectbox(
-            "1. Hoofdkarakter Emotie:", 
+            "1. Main Character Emotion:", 
             [geen_voorkeur,
-                "Geschrokken / Ogen groot (Shocked & wide-eyed)",
-                "Woedend / Gefrustreerd (Angry & yelling)",
-                "Paniekerig / Zweetdruppels (Panicked & sweating)",
-                "Geconcentreerd / Nerd (Focused & typing)",
-                "Nadenkend / Hand onder kin (Thinking)",
-                "Arrogant / Zelfverzekerd lachend (Arrogant smirking)",
-                "Doodsbang / Paranoïde (Terrified & paranoid)"
+                "Shocked / Wide-eyed",
+                "Angry / Frustrated / Yelling",
+                "Panicked / Sweating",
+                "Focused / Typing (Nerd)",
+                "Thinking / Hand under chin",
+                "Arrogant / Smirking",
+                "Terrified / Paranoid"
             ]
         )
         
         kleding_input = st.selectbox(
-            "3. Kleding Hoofdkarakter:",
+            "3. Main Character Clothing:",
             [geen_voorkeur,
-                "Standaard (Geen kleding, pure minimalistische stickman)",
-                "Zwarte Hoodie (Hacker / Geïsoleerde vibe)",
-                "Net pak met stropdas (Business / Succes vibe)",
-                "Casual T-shirt (Alledaags)"
+                "Standard (No clothes, pure minimalist stickman)",
+                "Black Hoodie (Hacker / Isolated vibe)",
+                "Suit and tie (Business / Success vibe)",
+                "Casual T-shirt (Everyday)"
             ]
         )
 
         omgeving_input = st.selectbox(
-            "5. Omgeving & Locatie:", 
+            "5. Environment & Location:", 
             [geen_voorkeur,
-                "Donkere kamer / Schermlicht (Dark room lit only by monitor)",
-                "Strakke kantoor / Studio (Clean minimal office)",
-                "Felle neon / Cyberpunk vibe (Neon glowing background)",
-                "Chaotische zolderkamer vol rommel (Messy attic room)",
-                "Minimalistische witte studio (Clean white minimalist room)",
-                "Donkere thriller / Criminologie setting (Dark gloomy basement)"
+                "Dark room lit only by monitor",
+                "Clean minimal office",
+                "Neon glowing background / Cyberpunk vibe",
+                "Messy attic room full of clutter",
+                "Clean white minimalist room",
+                "Dark gloomy basement / Thriller setting"
             ]
         )
         
         kleurvibe_input = st.selectbox(
-            "7. Kleurvibe (Color Palette):", 
+            "7. Color Palette (Mood):", 
             [geen_voorkeur,
-                "Cinematic Dark Blue (Donkerblauw / Sfeervol)",
-                "YouTube Pop (Geel & Zwart contrast)",
-                "Tech Sleek (Grijs & Blauw)",
-                "Alert Red (Rood & Donker)",
-                "Matrix Green & Black (Hacker groen)"
+                "Cinematic Dark Blue (Moody)",
+                "YouTube Pop (Yellow & Black contrast)",
+                "Tech Sleek (Grey & Blue)",
+                "Alert Red (Red & Dark)",
+                "Matrix Green & Black (Hacker green)"
             ]
         )
 
     with col2:
         compositie_input = st.selectbox(
-            "2. Perspectief & Camerahoek:", 
+            "2. Perspective & Camera Angle:", 
             [geen_voorkeur,
-                "Achter bureau / Computer (Desk setup with monitor)",
-                "Close-up van het gezicht (Extreme close-up)",
-                "Van boven / Vogelperspectief (Overhead view)",
-                "Van onderen opgekeken (Low angle dramatic shot)",
-                "Groothoek over de hele kamer (Wide angle room overview)",
-                "Over de schouder meekijken (Over-the-shoulder shot)"
+                "Desk setup with monitor",
+                "Extreme close-up of the face",
+                "Overhead view / Bird's-eye view",
+                "Low angle dramatic shot",
+                "Wide angle room overview",
+                "Over-the-shoulder shot"
             ]
         )
         
         element_input = st.selectbox(
-            "4. Secundair Element (Focal Point):", 
+            "4. Secondary Element (Focal Point):", 
             [geen_voorkeur,
-                "Computer / App interface (Monitor showing a UI/post)",
-                "Smartphone in de hand (Holding glowing phone)",
-                "Groot object / Gevaar voor zich (Pointing at object)",
-                "Grafieken en cijfers die exploderen (Exploding stock charts)",
-                "Lege bureaustoel ernaast (Empty chair next to him)",
-                "Geen secundair object (Focus purely on character)"
+                "Monitor showing a UI/post",
+                "Holding glowing smartphone",
+                "Pointing at large object / Danger ahead",
+                "Exploding stock charts and numbers",
+                "Empty desk chair next to him",
+                "No secondary object (Focus purely on character)"
             ]
         )
 
         belichting_input = st.selectbox(
-            "6. Lichtinval & Schaduw:",
+            "6. Lighting & Shadows:",
             [geen_voorkeur,
-                "Harde spotlight van boven (Interrogation / Isolation feel)",
-                "Zacht raamlicht van opzij (Soft window light)",
-                "Sterk contrast / Film Noir (Heavy shadows, cinematic)",
-                "Gloeiend licht van onderen (Glowing light from below, eerie)"
+                "Harsh spotlight from above (Interrogation / Isolation feel)",
+                "Soft window light from the side",
+                "High contrast / Film Noir (Heavy shadows, cinematic)",
+                "Glowing light from below (Eerie)"
             ]
         )
         
         achtergrond_karakters_input = st.selectbox(
-            "8. Achtergrond Karakters (Crowd Control):",
+            "8. Background Characters (Crowd Control):",
             [geen_voorkeur,
-                "Volledig leeg (Absoluut geen andere personen)",
-                "Vage donkere silhouetten (Ominous shadows of people)",
-                "Levendige menigte (Detailed background characters)",
-                "Eén andere persoon op de achtergrond (One specific extra person)"
+                "Completely empty (Absolutely no other people)",
+                "Vague dark silhouettes (Ominous shadows of people)",
+                "Lively crowd (Detailed background characters)",
+                "One other person in the background (One specific extra person)"
             ]
         )
 
     st.markdown("---")
     
-    st.subheader("✍️ Handmatige Sturing")
+    st.subheader("✍️ Manual Steering")
     scène_prompt = st.text_area(
-        "A. Wat is de gedetailleerde scène-beschrijving?", 
+        "A. What is the detailed scene description?", 
         value="standing in the middle of a room, full panicmode",
         height=80,
-        help="Typ hier je eigen scène. Wat is er specifiek aan de hand?"
+        help="Type your own scene here. What exactly is going on?"
     )
 
     negatieve_prompt = st.text_input(
-        "B. Wat mag er ABSOLUUT NIET in beeld zijn? (Negatieve prompt)", 
+        "B. What should ABSOLUTELY NOT be in the image? (Negative prompt)", 
         value="",
-        help="Bijv: 'tekst, letters, woorden, ramen, planten, realistische gezichten'"
+        help="E.g.: 'text, letters, words, windows, plants, realistic faces'"
     )
 
-    if st.button("🖼️ Genereer Ultieme Thumbnail"):
+    if st.button("🖼️ Generate Ultimate Thumbnail"):
         if not user_api_key:
             st.error("Please enter an OpenAI API key!")
             st.stop()
         if not scène_prompt:
-            st.warning("Vul eerst een scène in!")
+            st.warning("Please enter a scene description first!")
             st.stop()
 
         client = OpenAI(api_key=user_api_key)
 
-        with st.spinner("🎨 De AI bouwt de thumbnail met jouw exacte specificaties..."):
+        with st.spinner("🎨 The AI is building the thumbnail with your exact specifications..."):
             try:
-                # De gebalanceerde stijl-code 
+                # The balanced style code 
                 basis_kanaal_stijl = (
                     "STRICT CHANNEL STYLE GUIDE: "
                     "Ultra-sharp 2D minimalist black line art, vector clean lines, high resolution, crisp focus, "
@@ -558,7 +558,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
 
                 stijl_segmenten = []
 
-                # Voeg alle gemaakte keuzes toe
+                # Add all made choices
                 if emotie_input != geen_voorkeur:
                     stijl_segmenten.append(f"CHARACTER EMOTION: {emotie_input}.")
                 if kleding_input != geen_voorkeur:
@@ -576,7 +576,7 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 if achtergrond_karakters_input != geen_voorkeur:
                     stijl_segmenten.append(f"BACKGROUND CROWD RULE: {achtergrond_karakters_input}.")
 
-                # Koppel de negatieve prompt er hard aan vast als deze is ingevuld
+                # Hard link the negative prompt if it is filled in
                 anti_prompt = ""
                 if negatieve_prompt.strip():
                     anti_prompt = f" CRITICAL AVOIDANCE INSTRUCTIONS: You must absolutely NOT include any of the following elements in the image under any circumstances: {negatieve_prompt}."
@@ -598,12 +598,12 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 elif hasattr(image_data, 'b64_json') and image_data.b64_json:
                     img_data = base64.b64decode(image_data.b64_json)
                 else:
-                    raise Exception("Geen afbeelding ontvangen van de API.")
+                    raise Exception("No image received from the API.")
 
                 image_stream = io.BytesIO(img_data)
                 
-                st.success("BINGO! 🎉 Jouw uiterst gecontroleerde thumbnail is klaar!")
-                st.image(image_stream, caption="Gegenereerde Thumbnail", use_container_width=True)
+                st.success("BINGO! 🎉 Your highly controlled thumbnail is ready!")
+                st.image(image_stream, caption="Generated Thumbnail", use_container_width=True)
 
                 st.download_button(
                     label="📥 Download YouTube Thumbnail (JPG)",
@@ -613,4 +613,4 @@ elif huidige_pagina == "🖼️ Thumbnail Compositor":
                 )
 
             except Exception as e:
-                st.error(f"Er ging iets mis bij het genereren: {e}")
+                st.error(f"Something went wrong during generation: {e}")
